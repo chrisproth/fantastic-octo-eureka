@@ -11,8 +11,8 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ADMIN_PIN
-        sync: false
+        value: "1289371"
       - key: STARTING_FAAB
-        value: 1000
+        value: 500
       - key: DATABASE_URL
         sync: false

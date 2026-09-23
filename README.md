@@ -4,6 +4,37 @@ A self-hosted Flask party-game hub designed for a fantasy-football group. It has
 
 > FAAB in this project is virtual fantasy-football currency only. There is no cash wagering, deposits, withdrawals, or payment processing.
 
+## Fixed Frat Week roster (2026-09-22)
+
+This build contains a one-time roster migration. On the first boot of this version it upserts the requested players, sets their current/reset FAAB values, and sets their PINs. The migration is marked in the database so later Render restarts **do not reset FAAB again**.
+
+| Login | Team / display name | PIN | FAAB |
+|---|---|---:|---:|
+| `mike` | Chase Emeka Ceedeez | `74534` | 395 |
+| `goon` | D Henny in da butt | `4325` | 600 |
+| `jack` | Jeremiah Smith Sucks | `34276` | 809 |
+| `green` | JiSN My Pants | `23145231` | 320 |
+| `chris` | Ryan Wingo | `6542` | 855 |
+| `triz` | Seedlings of the West | `43125` | 511 |
+| `lago` | Team Linguine32 | `2356` | 582 |
+| `shaw` (or `Jake`) | Team ShawR Jake | `1542` | 580 |
+| `boosta` | The Scent of Autumn | `2341234` | 763 |
+| `joe` | Thorns of the East | `32456` | 596 |
+
+Admin PIN: `1289371` (or whatever value you later set in Render as `ADMIN_PIN`).
+
+## Interactive game controls
+
+- **Cup Pong:** grab the ping-pong ball, drag toward the cup rack, and release. Ten throws; sunk cups disappear.
+- **Beer Die:** grab and throw the die with a drag/release gesture. Landing on the opponent half scores; corner-cup hits score more.
+- **Flip Cup:** swipe the cup upward. Flick height and side-to-side error determine whether it completes a clean rotation and lands upright.
+- **Kings Cup:** full shuffled 52-card deck, central King's Cup, card-by-card actions, active house rules, and the game ends on the fourth King. This build uses the common U.S. mapping: A Waterfall, 2 You, 3 Me, 4 Floor, 5 Guys, 6 Chicks, 7 Heaven, 8 Mate, 9 Rhyme, 10 Categories, J Make a Rule, Q Question Master, K King's Cup.
+- **Quarters:** flick the quarter; it must bounce once on the table before entering the cup.
+- **Cornhole:** drag/release each bag; hole = 3, board = 1.
+- **Slap Cup:** rapid bounce shots with a moving cup target.
+
+All gesture games use Pointer Events, so the same controls work with a mouse or a touchscreen. PvP runs use the exact same game mechanics as CPU runs; the normalized run score is submitted once and locked.
+
 ## Included games
 
 - Pong — mouse/touch paddle game vs CPU

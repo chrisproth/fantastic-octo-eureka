@@ -14,13 +14,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 
 GAMES = {
-    "pong": {"name": "Pong", "icon": "🏓", "description": "Arcade pong against the house CPU."},
-    "beer-die": {"name": "Beer Die", "icon": "🎲", "description": "Timing-and-accuracy die toss challenge."},
-    "flip-cup": {"name": "Flip Cup", "icon": "🥤", "description": "Reaction game: nail five clean flips."},
-    "kings": {"name": "Kings", "icon": "🃏", "description": "Draw through a chaotic deck and outscore the CPU."},
-    "quarters": {"name": "Quarters", "icon": "🪙", "description": "Hit the timing window and sink the quarter."},
-    "cornhole": {"name": "Cornhole", "icon": "🌽", "description": "Dial in power and accuracy for four bags."},
-    "slap-cup": {"name": "Slap Cup", "icon": "⚡", "description": "Pure reaction speed against a tiny CPU."},
+    "pong": {"name": "Cup Pong", "icon": "🏓", "description": "Flick a ping-pong ball toward a triangle of cups. Sink more than the CPU."},
+    "beer-die": {"name": "Beer Die", "icon": "🎲", "description": "Drag and release the die to throw it high across the table and score clean landings."},
+    "flip-cup": {"name": "Flip Cup", "icon": "🥤", "description": "Flick the cup upward from the table edge and land it upright."},
+    "kings": {"name": "Kings Cup", "icon": "🃏", "description": "A full 52-card Kings Cup deck with the classic card actions and fourth-King finish."},
+    "quarters": {"name": "Quarters", "icon": "🪙", "description": "Flick a quarter so it bounces off the table and drops into the cup."},
+    "cornhole": {"name": "Cornhole", "icon": "🌽", "description": "Drag and release each bag toward the board; hole is 3, board is 1."},
+    "slap-cup": {"name": "Slap Cup", "icon": "⚡", "description": "Rapid-fire bounce shots: sink the ball, slap the cup, and keep moving."},
 }
 
 app = Flask(__name__)
@@ -112,6 +112,47 @@ class AuditLog(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
 
+class AppSetting(db.Model):
+    key = db.Column(db.String(120), primary_key=True)
+    value = db.Column(db.Text, nullable=False, default="")
+
+
+ROSTER_VERSION = "roster-2026-09-22-v1"
+ROSTER = [
+    {"username": "mike", "display_name": "Chase Emeka Ceedeez", "pin": "74534", "faab": 395},
+    {"username": "goon", "display_name": "D Henny in da butt", "pin": "4325", "faab": 600},
+    {"username": "jack", "display_name": "Jeremiah Smith Sucks", "pin": "34276", "faab": 809},
+    {"username": "green", "display_name": "JiSN My Pants", "pin": "23145231", "faab": 320},
+    {"username": "chris", "display_name": "Ryan Wingo", "pin": "6542", "faab": 855},
+    {"username": "triz", "display_name": "Seedlings of the West", "pin": "43125", "faab": 511},
+    {"username": "lago", "display_name": "Team Linguine32", "pin": "2356", "faab": 582},
+    {"username": "shaw", "display_name": "Team ShawR Jake", "pin": "1542", "faab": 580},
+    {"username": "boosta", "display_name": "The Scent of Autumn", "pin": "2341234", "faab": 763},
+    {"username": "joe", "display_name": "Thorns of the East", "pin": "32456", "faab": 596},
+]
+LOGIN_ALIASES = {"jake": "shaw"}
+
+
+def apply_roster_once():
+    if db.session.get(AppSetting, ROSTER_VERSION):
+        return
+    for entry in ROSTER:
+        player = Player.query.filter_by(username=entry["username"]).first()
+        if not player:
+            player = Player(username=entry["username"], display_name=entry["display_name"],
+                            pin_hash=generate_password_hash(entry["pin"]),
+                            faab_balance=entry["faab"], starting_faab=entry["faab"])
+            db.session.add(player)
+        else:
+            player.display_name = entry["display_name"]
+            player.pin_hash = generate_password_hash(entry["pin"])
+            player.faab_balance = entry["faab"]
+            player.starting_faab = entry["faab"]
+    db.session.add(AppSetting(key=ROSTER_VERSION, value=utcnow().isoformat()))
+    db.session.add(AuditLog(actor="system", action=f"Applied fixed Frat Week roster {ROSTER_VERSION}"))
+    db.session.commit()
+
+
 def current_player():
     pid = session.get("player_id")
     return db.session.get(Player, pid) if pid else None
@@ -195,6 +236,7 @@ def index():
 def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip().lower()
+        username = LOGIN_ALIASES.get(username, username)
         pin = request.form.get("pin", "")
         player = Player.query.filter_by(username=username).first()
         if player and check_password_hash(player.pin_hash, pin):
@@ -426,7 +468,7 @@ def pvp_status(match_id):
 def admin_login():
     if request.method == "POST":
         supplied = request.form.get("pin", "")
-        configured = os.getenv("ADMIN_PIN", "change-me")
+        configured = os.getenv("ADMIN_PIN", "1289371")
         if secrets.compare_digest(supplied, configured):
             session.clear()
             session["is_admin"] = True
@@ -736,6 +778,7 @@ def health():
 
 with app.app_context():
     db.create_all()
+    apply_roster_once()
 
 
 if __name__ == "__main__":
