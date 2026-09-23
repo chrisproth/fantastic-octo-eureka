@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Leaderboard · Frat Week{% endblock %}
+{% block content %}
+<div class="eyebrow">HOUSE STANDINGS</div><h1>Leaderboard</h1>
+<section class="panel"><table class="leader-table"><thead><tr><th>#</th><th>Player</th><th>All W-L</th><th>CPU</th><th>PvP</th><th>Win %</th><th>FAAB</th><th>Net</th></tr></thead><tbody>
+{% for p in players %}{% set total = p.wins + p.losses %}<tr><td>{{ loop.index }}</td><td><strong>{{ p.display_name }}</strong><br><small>@{{ p.username }}</small></td><td>{{ p.wins }}-{{ p.losses }}</td><td>{{ p.cpu_wins }}-{{ p.cpu_losses }}</td><td>{{ p.pvp_wins }}-{{ p.pvp_losses }}</td><td>{{ '%.1f'|format((p.wins / total * 100) if total else 0) }}%</td><td>${{ p.faab_balance }}</td><td class="{{ 'win' if p.faab_balance >= p.starting_faab else 'loss' }}">{{ '%+d'|format(p.faab_balance-p.starting_faab) }}</td></tr>{% else %}<tr><td colspan="8">No players yet.</td></tr>{% endfor %}
+</tbody></table></section>
+{% endblock %}

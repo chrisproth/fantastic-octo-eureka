@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}{{ game.name }} · Frat Week{% endblock %}
+{% block content %}
+<div class="eyebrow">CPU ARCADE</div><h1>{{ game.icon }} {{ game.name }}</h1><p>{{ game.description }}</p>
+<section class="panel"><div id="game-root" data-game="{{ game_key }}" data-mode="cpu"></div></section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='games.js') }}"></script>{% endblock %}

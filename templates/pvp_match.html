@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Match #{{ match.id }} · Frat Week{% endblock %}
+{% block content %}
+<div class="eyebrow">MATCH #{{ match.id }}</div><h1>{{ games[match.game].name }}: {{ player.display_name }} vs {{ other.display_name }}</h1>
+<div class="match-banner"><div><span>WAGER</span><strong>${{ match.wager }}</strong></div><div><span>STATUS</span><strong id="match-status">{{ match.status|upper }}</strong></div><div><span>YOUR SCORE</span><strong id="my-score">{{ my_score if my_score is not none else '—' }}</strong></div><div><span>OPP SCORE</span><strong id="other-score">{{ other_score if other_score is not none else '—' }}</strong></div></div>
+
+{% if match.status == 'pending' %}
+<section class="panel"><p>Waiting for <strong>{{ match.opponent.display_name }}</strong> to accept.</p>{% if match.challenger_id == player.id %}<form method="post" action="{{ url_for('pvp_cancel', match_id=match.id) }}"><button class="btn danger">Cancel Challenge & Refund</button></form>{% endif %}</section>
+{% elif match.status == 'completed' %}
+<section class="panel result"><h2>{{ 'YOU WON' if match.winner_id == player.id else 'YOU LOST' }}</h2><p>Final score: {{ my_score }} - {{ other_score }}</p></section>
+{% elif match.status == 'cancelled' %}<section class="panel"><h2>Match Cancelled</h2></section>
+{% else %}
+  {% if my_score is none %}
+  <section class="panel"><p>Play one run. Your normalized score will be locked after submission; higher score wins.</p><div id="game-root" data-game="{{ match.game }}" data-mode="pvp" data-match-id="{{ match.id }}"></div></section>
+  {% else %}
+  <section class="panel"><h2>Score locked: {{ my_score }}</h2><p>Waiting for {{ other.display_name }} to finish.</p></section>
+  {% endif %}
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if match.status == 'active' and my_score is none %}<script src="{{ url_for('static', filename='games.js') }}"></script>{% endif %}{% endblock %}

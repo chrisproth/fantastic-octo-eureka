@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}{{ player.display_name }} · Frat Week{% endblock %}
+{% block content %}
+<section class="profile-head">
+  <div><div class="eyebrow">PLAYER HQ</div><h1>{{ player.display_name }}</h1><p>@{{ player.username }}</p></div>
+  <div class="stat-big"><span>FAAB</span><strong>${{ player.faab_balance }}</strong></div>
+  <div class="stat-big"><span>ALL GAMES</span><strong>{{ player.wins }}-{{ player.losses }}</strong></div>
+  <div class="stat-big"><span>PVP</span><strong>{{ player.pvp_wins }}-{{ player.pvp_losses }}</strong></div>
+</section>
+
+<div class="button-row"><a class="btn primary" href="{{ url_for('pvp_new') }}">Create PvP Challenge</a></div>
+
+{% if incoming %}<section class="panel"><h2>Incoming Challenges</h2>
+{% for m in incoming %}<div class="challenge-row"><div><strong>{{ m.challenger.display_name }}</strong> challenged you to {{ games[m.game].name }} for <strong>${{ m.wager }} FAAB</strong>.</div><div class="button-row compact"><form method="post" action="{{ url_for('pvp_accept', match_id=m.id) }}"><button class="btn small primary">Accept</button></form><form method="post" action="{{ url_for('pvp_decline', match_id=m.id) }}"><button class="btn small danger">Decline</button></form></div></div>{% endfor %}
+</section>{% endif %}
+
+{% if active %}<section class="panel"><h2>Active PvP</h2>
+{% for m in active %}<div class="challenge-row"><div>{{ games[m.game].name }} vs {% if m.challenger_id == player.id %}{{ m.opponent.display_name }}{% else %}{{ m.challenger.display_name }}{% endif %} · ${{ m.wager }}</div><a class="btn small" href="{{ url_for('pvp_match', match_id=m.id) }}">Open Match</a></div>{% endfor %}
+</section>{% endif %}
+
+<h2>CPU Arcade</h2>
+<div class="game-grid compact-grid">{% for key,g in games.items() %}<a class="game-card clickable" href="{{ url_for('play_game', game=key) }}"><div class="game-icon">{{ g.icon }}</div><h3>{{ g.name }}</h3><p>{{ stats.get(key).wins if stats.get(key) else 0 }}-{{ stats.get(key).losses if stats.get(key) else 0 }}</p></a>{% endfor %}</div>
+
+<section class="panel"><h2>Recent PvP History</h2><table><thead><tr><th>Game</th><th>Opponent</th><th>Result</th><th>Wager</th><th>Score</th></tr></thead><tbody>
+{% for m in history %}{% set me_chal = m.challenger_id == player.id %}<tr><td>{{ games[m.game].name }}</td><td>{{ m.opponent.display_name if me_chal else m.challenger.display_name }}</td><td class="{{ 'win' if m.winner_id == player.id else 'loss' }}">{{ 'WIN' if m.winner_id == player.id else 'LOSS' }}</td><td>${{ m.wager }}</td><td>{{ m.challenger_score if me_chal else m.opponent_score }} - {{ m.opponent_score if me_chal else m.challenger_score }}</td></tr>{% else %}<tr><td colspan="5">No completed PvP matches.</td></tr>{% endfor %}
+</tbody></table></section>
+{% endblock %}

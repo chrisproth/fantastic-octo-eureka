@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Player Login · Frat Week{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>Player Login</h1>
+  <form method="post" class="stack">
+    <label>Username<input name="username" autocomplete="username" required></label>
+    <label>PIN<input name="pin" type="password" inputmode="numeric" autocomplete="current-password" required></label>
+    <button class="btn primary" type="submit">Enter</button>
+  </form>
+  <p class="muted">Accounts and PINs are created by the commissioner in Admin.</p>
+</div>
+{% endblock %}

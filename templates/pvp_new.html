@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}New Challenge · Frat Week{% endblock %}
+{% block content %}
+<div class="auth-card wide"><div class="eyebrow">HEAD TO HEAD</div><h1>Create a Challenge</h1><p>You have <strong>${{ player.faab_balance }} FAAB</strong>. Your wager is escrowed when you send the challenge.</p>
+<form method="post" class="stack">
+<label>Game<select name="game" required>{% for key,g in games.items() %}<option value="{{ key }}">{{ g.name }}</option>{% endfor %}</select></label>
+<label>Opponent<select name="opponent_id" required>{% for p in opponents %}<option value="{{ p.id }}">{{ p.display_name }} · ${{ p.faab_balance }} FAAB</option>{% endfor %}</select></label>
+<label>FAAB wager<input type="number" name="wager" min="0" max="{{ player.faab_balance }}" value="25" required></label>
+<button class="btn primary" type="submit">Send Challenge</button>
+</form><p class="muted">Both players stake the same amount. Winner receives the full pot. Use 0 for bragging-rights-only matches.</p></div>
+{% endblock %}

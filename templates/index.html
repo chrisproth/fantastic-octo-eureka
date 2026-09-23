@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Frat Week{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <div class="eyebrow">THE HOUSE NEVER SLEEPS. RENDER MIGHT.</div>
+    <h1>FRAT WEEK</h1>
+    <p>CPU mini-games, head-to-head challenges, league FAAB wagers, and one leaderboard for all the damage.</p>
+    <div class="button-row">
+      {% if current_player %}
+        <a class="btn primary" href="{{ url_for('dashboard') }}">Enter the House</a>
+      {% else %}
+        <a class="btn primary" href="{{ url_for('login') }}">Player Login</a>
+      {% endif %}
+      <a class="btn" href="{{ url_for('leaderboard') }}">View Leaderboard</a>
+    </div>
+  </div>
+  <div class="hero-card">
+    <span>FAAB POT</span>
+    <strong>{{ leaders|sum(attribute='faab_balance') if leaders else 0 }}</strong>
+    <small>across the current top 10</small>
+  </div>
+</section>
+
+<h2>Games</h2>
+<div class="game-grid">
+  {% for key, g in games.items() %}
+  <article class="game-card">
+    <div class="game-icon">{{ g.icon }}</div>
+    <h3>{{ g.name }}</h3>
+    <p>{{ g.description }}</p>
+    {% if current_player %}<a class="btn small" href="{{ url_for('play_game', game=key) }}">Play CPU</a>{% endif %}
+  </article>
+  {% endfor %}
+</div>
+
+<div class="two-col">
+<section class="panel">
+  <h2>Top of the House</h2>
+  <table><thead><tr><th>#</th><th>Player</th><th>W-L</th><th>FAAB</th></tr></thead><tbody>
+  {% for p in leaders %}<tr><td>{{ loop.index }}</td><td>{{ p.display_name }}</td><td>{{ p.wins }}-{{ p.losses }}</td><td>${{ p.faab_balance }}</td></tr>{% else %}<tr><td colspan="4">No players yet. Admin can create the first one.</td></tr>{% endfor %}
+  </tbody></table>
+</section>
+<section class="panel">
+  <h2>Recent PvP</h2>
+  {% for m in recent %}
+    <div class="match-line"><strong>{{ m.challenger.display_name }}</strong> vs <strong>{{ m.opponent.display_name }}</strong><span>{{ games[m.game].name }} · ${{ m.wager }}</span></div>
+  {% else %}<p class="muted">No completed PvP matches yet.</p>{% endfor %}
+</section>
+</div>
+{% endblock %}

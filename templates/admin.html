@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Admin · Frat Week{% endblock %}
+{% block content %}
+<div class="eyebrow">COMMISSIONER CONTROL ROOM</div><h1>Frat Week Admin</h1>
+<div class="button-row"><a class="btn" href="{{ url_for('admin_export') }}">Export JSON Backup</a><a class="btn danger" href="{{ url_for('admin_logout') }}">Admin Logout</a></div>
+
+<div class="two-col">
+<section class="panel"><h2>Create Player</h2><form method="post" action="{{ url_for('admin_create_player') }}" class="stack"><label>Username<input name="username" required></label><label>Display name<input name="display_name" required></label><label>PIN<input type="password" name="pin" minlength="4" required></label><label>Starting FAAB<input type="number" name="faab" min="0" value="1000" required></label><button class="btn primary">Create Player</button></form></section>
+<section class="panel danger-zone"><h2>Reset Everything</h2><p>Resets every player to their own starting FAAB and zeroes stats. Match history remains.</p><form method="post" action="{{ url_for('admin_reset_all') }}" class="stack"><label>Confirmation<input name="confirm" placeholder="RESET FRAT WEEK"></label><button class="btn danger">Reset All Balances & Stats</button></form></section>
+</div>
+
+<section class="panel danger-zone"><h2>Restore JSON Backup</h2><p>This replaces the current database state. Use only a backup exported by this app.</p><form method="post" action="{{ url_for('admin_import') }}" enctype="multipart/form-data" class="stack"><label>Backup file<input type="file" name="backup" accept="application/json,.json" required></label><label>Confirmation<input name="confirm" placeholder="IMPORT FRAT WEEK" required></label><button class="btn danger">Import & Replace State</button></form></section>
+
+<section class="panel"><h2>Players</h2><div class="admin-cards">{% for p in players %}<article class="admin-player"><div><h3>{{ p.display_name }}</h3><p>@{{ p.username }} · {{ p.wins }}-{{ p.losses }} · ${{ p.faab_balance }} FAAB</p></div><form method="post" action="{{ url_for('admin_set_balance', player_id=p.id) }}"><input type="number" name="balance" min="0" value="{{ p.faab_balance }}"><button class="btn small">Set FAAB</button></form><form method="post" action="{{ url_for('admin_set_pin', player_id=p.id) }}"><input type="password" name="pin" minlength="4" placeholder="New PIN"><button class="btn small">Set PIN</button></form><form method="post" action="{{ url_for('admin_reset_player_stats', player_id=p.id) }}"><button class="btn small danger">Reset Stats</button></form></article>{% else %}<p>No players.</p>{% endfor %}</div></section>
+
+<section class="panel"><h2>Recent Matches</h2><table><thead><tr><th>ID</th><th>Game</th><th>Players</th><th>Wager</th><th>Status</th><th>Action</th></tr></thead><tbody>{% for m in matches %}<tr><td>#{{ m.id }}</td><td>{{ games[m.game].name }}</td><td>{{ m.challenger.display_name }} vs {{ m.opponent.display_name }}</td><td>${{ m.wager }}</td><td>{{ m.status }}</td><td>{% if m.status in ['pending','active'] %}<form method="post" action="{{ url_for('admin_void_match', match_id=m.id) }}"><button class="btn small danger">Void + Refund</button></form>{% else %}—{% endif %}</td></tr>{% endfor %}</tbody></table></section>
+
+<div class="two-col"><section class="panel"><h2>FAAB Ledger</h2>{% for t in txns %}<div class="ledger"><span>{{ t.player.display_name }} · {{ t.reason }}</span><strong class="{{ 'win' if t.amount >= 0 else 'loss' }}">{{ '%+d'|format(t.amount) }} → ${{ t.balance_after }}</strong></div>{% else %}<p>No transactions.</p>{% endfor %}</section><section class="panel"><h2>Audit Log</h2>{% for a in audits %}<div class="ledger"><span>{{ a.actor }}</span><span>{{ a.action }}</span></div>{% else %}<p>No audit events.</p>{% endfor %}</section></div>
+{% endblock %}
