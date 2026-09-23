@@ -194,3 +194,11 @@ If Jake declines before accepting, Chris's 50 is refunded. If a match is stuck, 
 ## Backup / restore
 
 The admin **Export JSON Backup** includes player records, hashed player PINs, FAAB balances, per-game stats, matches, transactions, and audit history. The admin restore form performs a full state replacement and requires the exact confirmation phrase `IMPORT FRAT WEEK`. Keep exported backup files private: although PINs are not stored as plaintext, short PIN hashes should still be treated as sensitive authentication data.
+
+## Gameplay polish update (v3)
+
+- Slap Cup is now a 30-second rapid race: bounce once, sink, then click/tap the glowing cup to slap it and advance. The bounce physics were reworked so successful shots can actually carry from the bounce zone into the cup.
+- Canvas game physics now use frame-time normalization, so throws run at the same speed on 60 Hz, 120 Hz, and other refresh-rate displays.
+- Cup Pong, Beer Die, Quarters, and Cornhole now have motion trails, softer shadows, impact feedback, score animations, and smoother release/landing animation.
+- Flip Cup now has smoother 3D-style movement, a moving shadow, and success/miss feedback.
+- Kings Cup now animates card flips, rule changes, and King/cup events.
